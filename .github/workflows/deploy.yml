@@ -1,47 +1,60 @@
-                        # Tên của workflow
-                        name: Deploy to GitHub Pages
+                                # Tên của workflow
+                                name: Deploy to GitHub Pages
 
-                        # Kích hoạt workflow mỗi khi có push tới nhánh main
-                        on:
-                          push:
-                            branches: [ "main" ]
+                                # Kích hoạt workflow mỗi khi có push tới nhánh main
+                                on:
+                                  push:
+                                    branches: [ "main" ]
 
-                        # Cấp quyền cho workflow để nó có thể ghi vào Pages
-                        permissions:
-                          contents: read
-                          pages: write
-                          id-token: write
+                                # Cấp quyền cho workflow để nó có thể ghi vào Pages
+                                permissions:
+                                  contents: read
+                                  pages: write
+                                  id-token: write
 
-                        # Hủy các lần chạy cũ nếu có commit mới
-                        concurrency:
-                          group: "pages"
-                          cancel-in-progress: true
+                                # Hủy các lần chạy cũ nếu có commit mới
+                                concurrency:
+                                  group: "pages"
+                                  cancel-in-progress: true
 
-                        # Các công việc cần làm
-                        jobs:
-                          deploy:
-                            environment:
-                              name: github-pages
-                              url: ${{ steps.deployment.outputs.page_url }}
-                            runs-on: ubuntu-latest
-                            steps:
-                              - name: Checkout
-                                uses: actions/checkout@v4
-                              - name: Set up Node.js
-                                uses: actions/setup-node@v4
-                                with:
-                                  node-version: 18
-                              - name: Install dependencies
-                                run: npm ci
-                              - name: Build
-                                run: npm run build:client
-                              - name: Setup Pages
-                                uses: actions/configure-pages@v4
-                              - name: Upload artifact
-                                uses: actions/upload-pages-artifact@v2
-                                with:
-                                  # Upload thư mục dist
-                                  path: './dist'
-                              - name: Deploy to GitHub Pages
-                                id: deployment
-                                uses: actions/deploy-pages@v3
+                                # Các công việc cần làm
+                                jobs:
+                                  deploy:
+                                    environment:
+                                      name: github-pages
+                                      url: ${{ steps.deployment.outputs.page_url }}
+                                    runs-on: ubuntu-latest
+                                    steps:
+                                      - name: Checkout
+                                        uses: actions/checkout@v4
+                                      - name: Set up Node.js
+                                        uses: actions/setup-node@v4
+                                        with:
+                                          node-version: 18
+
+                                      # SỬA LẠI BƯỚC NÀY: Thêm working-directory
+                                      - name: Install dependencies in client directory
+                                        working-directory: ./client
+                                        run: npm ci
+
+                                      # SỬA LẠI BƯỚC NÀY: Thêm working-directory
+                                      - name: Build client
+                                        working-directory: ./client
+                                        run: npm run build
+
+                                      # SỬA LẠI BƯỚC NÀY: Sửa đường dẫn đến file 404.html
+                                      - name: Create 404.html for SPA Redirect
+                                        run: cp client/dist/index.html client/dist/404.html
+
+                                      - name: Setup Pages
+                                        uses: actions/configure-pages@v4
+
+                                      # SỬA LẠI BƯỚC NÀY: Sửa đường dẫn thư mục upload
+                                      - name: Upload artifact
+                                        uses: actions/upload-pages-artifact@v2
+                                        with:
+                                          path: './client/dist'
+
+                                      - name: Deploy to GitHub Pages
+                                        id: deployment
+                                        uses: actions/deploy-pages@v3
