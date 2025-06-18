@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://setupquan.autoshop.com.vn/sitemap.xml
+
+# Disallow admin pages from search engines
+Disallow: /admin/
+Disallow: /contact-test
+Disallow: /form-test
+
+# Allow important pages
+Allow: /blog/
+Allow: /blog/*
+
+# Crawl-delay
+Crawl-delay: 1
